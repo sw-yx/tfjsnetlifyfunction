@@ -4,12 +4,66 @@
     fun
   </head>
   <body>
-    <!-- Add image -->
-    <img id="img" crossorigin src="https://i.imgur.com/e5KD2lt.jpg" />
+    <input type="file" name="filename" id="file" />
+    <div id="preview">
+      <img id="img" crossorigin src="https://i.imgur.com/e5KD2lt.jpg" />
+    </div>
     <h1 id="message">Hello, I'm a simple web page!</h1>
     <!-- Add script where our code will go -->
     <script>
-      document.getElementById('message').innerText = 'Ready to code';
+      var fileEl = document.getElementById('file');
+      var preview = document.getElementById('preview');
+
+      fileEl.addEventListener('change', handleFiles);
+      function handleFiles({ target }) {
+        const files = target.files;
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          if (!file.type.startsWith('image/')) {
+            continue;
+          }
+
+          const img = document.createElement('img');
+          img.classList.add('obj');
+          img.file = file;
+          [...preview.children].forEach(child => preview.removeChild(child));
+          preview.appendChild(img); // Assuming that "preview" is the div output where the content will be displayed.
+
+          const reader = new FileReader();
+          reader.onload = (function(aImg) {
+            return function(e) {
+              aImg.src = e.target.result;
+
+              fetch('/.netlify/functions/tfjs', {
+                method: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                body: aImg.src
+              })
+                .then(response => response.json())
+                .then(console.log)
+                .catch(err => console.error(err));
+              // var canvas = document.createElement('canvas');
+              // var fromPixels2DContext = canvas.getContext('2d');
+              // var width = imgEl.width;
+              // var height = imgEl.height;
+              // fromPixels2DContext.canvas.width = width;
+              // fromPixels2DContext.canvas.height = height;
+              // fromPixels2DContext.drawImage(imgEl, 0, 0, width, height);
+              // var imageData = fromPixels2DContext.getImageData(0, 0, width, height)
+              //   .data;
+              // fetch('/.netlify/functions/tfjs', {
+              //   method: 'POST',
+              //   contentType: 'application/json; charset=utf-8',
+              //   body: JSON.stringify(imageData)
+              // })
+              //   .then(x => x.json())
+              //   .then(console.log);
+            };
+          })(img);
+          reader.readAsDataURL(file);
+        }
+      }
     </script>
   </body>
 </html>
