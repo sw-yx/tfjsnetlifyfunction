@@ -1,7 +1,7 @@
 const toUint8Array = require('base64-to-uint8array');
+const tf = require('@tensorflow/tfjs-node');
+const mobilenet = require('@tensorflow-models/mobilenet');
 exports.handler = async (event, context) => {
-  const tf = require('@tensorflow/tfjs-node');
-  const mobilenet = require('@tensorflow-models/mobilenet');
   try {
     // https://towardsdatascience.com/image-object-detection-with-tensorflow-js-b8861119ed46
     let img = event.body;
